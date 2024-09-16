@@ -147,6 +147,7 @@ func (h *Handler) addToFavorites(c *gin.Context) {
 }
 
 func (h *Handler) getRatingsByBookID(c *gin.Context) {
+	fmt.Println("call getRatingsByBookID")
 	bookID, err := uuid.Parse(c.Query("book_id"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
