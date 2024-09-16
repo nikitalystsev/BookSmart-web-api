@@ -16,6 +16,7 @@ type Handler struct {
 	libCardService     intf.ILibCardService
 	readerService      intf.IReaderService
 	reservationService intf.IReservationService
+	ratingService      intf.IRatingService
 	tokenManager       auth.ITokenManager
 	hasher             hash.IPasswordHasher
 	accessTokenTTL     time.Duration
@@ -27,6 +28,7 @@ func NewHandler(
 	libCardService intf.ILibCardService,
 	readerService intf.IReaderService,
 	reservationService intf.IReservationService,
+	ratingService intf.IRatingService,
 	tokenManager auth.ITokenManager,
 	accessTokenTTL time.Duration,
 	refreshTokenTTL time.Duration,
@@ -36,6 +38,7 @@ func NewHandler(
 		libCardService:     libCardService,
 		readerService:      readerService,
 		reservationService: reservationService,
+		ratingService:      ratingService,
 		tokenManager:       tokenManager,
 		accessTokenTTL:     accessTokenTTL,
 		refreshTokenTTL:    refreshTokenTTL,
@@ -62,6 +65,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		general.GET("/books", h.getBooks)
 		general.GET("/books/:id", h.getBookByID)
+		general.GET("/ratings", h.getRatingsByBookID)
 	}
 
 	api := router.Group("/api", h.readerIdentity)
@@ -77,6 +81,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		api.GET("/reservations", h.getReservationsByReaderID)
 		api.GET("/reservations/:id", h.getReservationsByID)
 		api.PUT("/reservations/:id", h.updateReservation)
+
+		api.POST("/ratings", h.addNewRating)
 
 		admin := api.Group("/admin")
 		{

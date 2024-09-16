@@ -146,6 +146,75 @@ func (h *Handler) addToFavorites(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+func (h *Handler) getRatingsByBookID(c *gin.Context) {
+	bookID, err := uuid.Parse(c.Query("book_id"))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ratings, err := h.ratingService.GetByBookID(c.Request.Context(), bookID)
+	if err != nil && errors.Is(err, errs.ErrRatingDoesNotExists) {
+		c.AbortWithStatusJSON(http.StatusNotFound, err.Error())
+		return
+	}
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_ratings := make([]*jsonmodels.RatingModel, len(ratings))
+	for i, rating := range ratings {
+		_ratings[i] = h.convertToJSONRatingModel(rating)
+	}
+
+	c.JSON(http.StatusOK, _ratings)
+}
+
+func (h *Handler) addNewRating(c *gin.Context) {
+	var ratingDTO dto.RatingDTO
+	if err := c.BindJSON(&ratingDTO); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	readerIDStr, _, err := getReaderData(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	readerID, err := uuid.Parse(readerIDStr)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	rating := &models.RatingModel{
+		ID:       uuid.New(),
+		ReaderID: readerID,
+		BookID:   ratingDTO.BookID,
+		Review:   ratingDTO.Review,
+		Rating:   ratingDTO.Rating,
+	}
+
+	err = h.ratingService.Create(c.Request.Context(), rating)
+	if errors.Is(err, errs.ErrRatingAlreadyExist) {
+		c.AbortWithStatusJSON(http.StatusConflict, err.Error())
+		return
+	}
+	if errors.Is(err, errs.ErrReservationDoesNotExists) {
+		c.AbortWithStatusJSON(http.StatusNotFound, err.Error())
+		return
+	}
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
 func (h *Handler) convertToJSONBookModel(book *models.BookModel) *jsonmodels.BookModel {
 	return &jsonmodels.BookModel{
 		ID:             book.ID,
@@ -158,5 +227,15 @@ func (h *Handler) convertToJSONBookModel(book *models.BookModel) *jsonmodels.Boo
 		PublishingYear: book.PublishingYear,
 		Language:       book.Language,
 		AgeLimit:       book.AgeLimit,
+	}
+}
+
+func (h *Handler) convertToJSONRatingModel(rating *models.RatingModel) *jsonmodels.RatingModel {
+	return &jsonmodels.RatingModel{
+		ID:       rating.ID,
+		ReaderID: rating.ReaderID,
+		BookID:   rating.BookID,
+		Review:   rating.Review,
+		Rating:   rating.Rating,
 	}
 }

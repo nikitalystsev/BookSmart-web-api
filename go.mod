@@ -6,7 +6,8 @@ require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
-	github.com/nikitalystsev/BookSmart-services v0.0.0-20240910225524-d39b2d5f7cdb
+	github.com/nikitalystsev/BookSmart-repo-postgres v0.0.0-20240913190920-c0fb8fd3d250
+	github.com/nikitalystsev/BookSmart-services v0.0.0-20240916123724-16020cbeaf39
 )
 
 require (
