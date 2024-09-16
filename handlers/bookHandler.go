@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -148,6 +149,7 @@ func (h *Handler) addToFavorites(c *gin.Context) {
 
 func (h *Handler) getRatingsByBookID(c *gin.Context) {
 	fmt.Println("call getRatingsByBookID")
+
 	bookID, err := uuid.Parse(c.Query("book_id"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
@@ -164,16 +166,20 @@ func (h *Handler) getRatingsByBookID(c *gin.Context) {
 		return
 	}
 
-	_ratings := make([]*jsonmodels.RatingModel, len(ratings))
+	_ratings := make([]*dto.RatingOutputDTO, len(ratings))
 	for i, rating := range ratings {
-		_ratings[i] = h.convertToJSONRatingModel(rating)
+		_ratings[i], err = h.copyRatingModelToOutputDTO(c.Request.Context(), rating)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, _ratings)
 }
 
 func (h *Handler) addNewRating(c *gin.Context) {
-	var ratingDTO dto.RatingDTO
+	var ratingDTO dto.RatingInputDTO
 	if err := c.BindJSON(&ratingDTO); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
@@ -216,6 +222,26 @@ func (h *Handler) addNewRating(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+func (h *Handler) getAvgRatingByBookID(c *gin.Context) {
+	bookID, err := uuid.Parse(c.Query("book_id"))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	avgRating, err := h.ratingService.GetAvgRatingByBookID(c.Request.Context(), bookID)
+	if err != nil && errors.Is(err, errs.ErrRatingDoesNotExists) {
+		c.AbortWithStatusJSON(http.StatusNotFound, err.Error())
+		return
+	}
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.AvgRatingDTO{AvgRating: avgRating})
+}
+
 func (h *Handler) convertToJSONBookModel(book *models.BookModel) *jsonmodels.BookModel {
 	return &jsonmodels.BookModel{
 		ID:             book.ID,
@@ -239,4 +265,20 @@ func (h *Handler) convertToJSONRatingModel(rating *models.RatingModel) *jsonmode
 		Review:   rating.Review,
 		Rating:   rating.Rating,
 	}
+}
+
+func (h *Handler) copyRatingModelToOutputDTO(ctx context.Context, rating *models.RatingModel) (*dto.RatingOutputDTO, error) {
+	reader, err := h.readerService.GetByID(ctx, rating.ReaderID)
+	if err != nil && !errors.Is(err, errs.ErrReaderDoesNotExists) {
+		return nil, err
+	}
+	if reader == nil {
+		return nil, errs.ErrReaderDoesNotExists
+	}
+
+	return &dto.RatingOutputDTO{
+		Reader: reader.Fio,
+		Rating: rating.Rating,
+		Review: rating.Review,
+	}, nil
 }

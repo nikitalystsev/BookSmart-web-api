@@ -66,6 +66,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		general.GET("/books", h.getBooks)
 		general.GET("/books/:id", h.getBookByID)
 		general.GET("/ratings", h.getRatingsByBookID)
+		general.GET("/ratings/avg", h.getAvgRatingByBookID)
 	}
 
 	api := router.Group("/api", h.readerIdentity)
