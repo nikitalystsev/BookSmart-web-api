@@ -64,6 +64,8 @@ github.com/nikitalystsev/BookSmart-services v0.0.0-20240916130654-a8eb46a9d4f9 h
 github.com/nikitalystsev/BookSmart-services v0.0.0-20240916130654-a8eb46a9d4f9/go.mod h1:JbPrba/KXP9DrltY1yuz09AFgNANLzqetT+TYROKbwQ=
 github.com/nikitalystsev/BookSmart-services v0.0.0-20240916211448-42517bf0a11c h1:yS8nwiyHLEwDgiNcvxNoFuCx6dp2Qi6z2tg/jtB0N0Y=
 github.com/nikitalystsev/BookSmart-services v0.0.0-20240916211448-42517bf0a11c/go.mod h1:j63j5SHSuxxgv8O5jHUCgmWX0FsxU6AK0nrt8MNrFss=
+github.com/nikitalystsev/BookSmart-services v0.0.0-20240919123005-14b28ba85ee2 h1:f9m57/kQ88+VVicSNcNe3MbmPuSWly2nP1a7Zdcwhw8=
+github.com/nikitalystsev/BookSmart-services v0.0.0-20240919123005-14b28ba85ee2/go.mod h1:j63j5SHSuxxgv8O5jHUCgmWX0FsxU6AK0nrt8MNrFss=
 github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=
 github.com/pelletier/go-toml/v2 v2.2.2/go.mod h1:1t835xjRzz80PqgE6HHgN2JOsmgYu/h4qDAS4n929Rs=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

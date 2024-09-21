@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
-	github.com/nikitalystsev/BookSmart-services v0.0.0-20240916211448-42517bf0a11c
+	github.com/nikitalystsev/BookSmart-services v0.0.0-20240919123005-14b28ba85ee2
 )
 
 require (
@@ -38,4 +38,8 @@ require (
 	golang.org/x/text v0.18.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
+
+replace (
+	github.com/nikitalystsev/BookSmart-services => ../component-services
 )

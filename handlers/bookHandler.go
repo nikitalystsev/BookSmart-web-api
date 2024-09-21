@@ -197,6 +197,11 @@ func (h *Handler) addNewRating(c *gin.Context) {
 		return
 	}
 
+	if ratingDTO.Rating < 0 || ratingDTO.Rating > 5 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "invalid rating")
+		return
+	}
+
 	rating := &models.RatingModel{
 		ID:       uuid.New(),
 		ReaderID: readerID,
