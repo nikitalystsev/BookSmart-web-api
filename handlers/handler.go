@@ -6,6 +6,8 @@ import (
 	"github.com/nikitalystsev/BookSmart-services/intf"
 	"github.com/nikitalystsev/BookSmart-services/pkg/auth"
 	"github.com/nikitalystsev/BookSmart-services/pkg/hash"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"io"
 	"net/http"
 	"time"
@@ -53,45 +55,40 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router.Use(h.corsSettings())
 
-	authenticate := router.Group("/auth")
+	api := router.Group("/api")
 	{
-		authenticate.POST("/sign-up", h.signUp)
-		authenticate.POST("/sign-in", h.signIn)
-		authenticate.POST("/admin/sign-in", h.signInAsAdmin)
-		authenticate.POST("/refresh", h.refresh)
-	}
-
-	general := router.Group("/")
-	{
-		general.GET("/books", h.getBooks)
-		general.GET("/books/:id", h.getBookByID)
-		general.GET("/ratings", h.getRatingsByBookID)
-		general.GET("/ratings/avg", h.getAvgRatingByBookID)
-	}
-
-	api := router.Group("/api", h.readerIdentity)
-	{
-		api.POST("/favorites", h.addToFavorites)
-		api.GET("/readers", h.getReaderByPhoneNumber)
-
-		api.POST("/lib-cards", h.createLibCard)
-		api.PUT("/lib-cards", h.updateLibCard)
-		api.GET("/lib-cards", h.getLibCardByReaderID)
-
-		api.POST("/reservations", h.reserveBook)
-		api.GET("/reservations", h.getReservationsByReaderID)
-		api.GET("/reservations/:id", h.getReservationsByID)
-		api.PUT("/reservations/:id", h.updateReservation)
-
-		api.POST("/ratings", h.addNewRating)
-
-		admin := api.Group("/admin")
+		v1 := api.Group("/v1")
 		{
-			admin.DELETE("/books/:id", h.deleteBook)
-			admin.POST("/books", h.addNewBook)
-			admin.GET("/reservations", h.getReservationsByBookID)
+			v1.POST("/auth/sign-up", h.signUp)
+			v1.POST("/auth/sign-in", h.signIn)
+			v1.POST("/auth/refresh", h.refresh)
+
+			v1.GET("/books", h.getPageBooks)
+			v1.GET("/books/:id", h.getBookByID)
+
+			v1.GET("/books/:id/ratings/avg", h.getAvgRatingByBookID)
+			v1.GET("/books/:id/ratings", h.getRatingsByBookID)
+
+			registered := v1.Group("/", h.readerIdentity)
+			{
+				registered.POST("/books/:id/ratings", h.addNewRating)
+
+				registered.GET("/readers/:id", h.getReaderByID)
+				registered.POST("/readers/:id/favorite_books", h.addToFavorites)
+
+				registered.GET("/readers/:id/lib_cards", h.getLibCardByReaderID)
+				registered.PUT("/readers/:id/lib_cards", h.updateLibCard)
+				registered.POST("/readers/:id/lib_cards", h.createLibCard)
+
+				registered.POST("/readers/:id/reservations", h.reserveBook)
+				registered.GET("/readers/:id/reservations", h.getReservationsByReaderID)
+				registered.GET("/readers/:id/reservations/:reservation_id", h.getReservationByID)
+				registered.PATCH("/readers/:id/reservations/:reservation_id", h.updateReservation)
+			}
 		}
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return router
 }
@@ -102,6 +99,7 @@ func (h *Handler) corsSettings() gin.HandlerFunc {
 			http.MethodPost,
 			http.MethodGet,
 			http.MethodPut,
+			http.MethodPatch,
 			http.MethodDelete,
 		},
 		AllowOrigins: []string{
@@ -117,3 +115,12 @@ func (h *Handler) corsSettings() gin.HandlerFunc {
 		},
 	})
 }
+
+// убрал из-за веба
+//authenticate := router.Group("/auth")
+//{
+//authenticate.POST("/sign-up", h.signUp)
+//authenticate.POST("/sign-in", h.signIn)
+//authenticate.POST("/admin/sign-in", h.signInAsAdmin)
+//authenticate.POST("/refresh", h.refresh)
+//}

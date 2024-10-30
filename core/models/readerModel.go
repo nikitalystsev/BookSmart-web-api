@@ -2,7 +2,7 @@ package models
 
 import "github.com/google/uuid"
 
-type ReaderModel struct {
+type JSONReaderModel struct {
 	ID          uuid.UUID `json:"id"`
 	Fio         string    `json:"fio"`
 	PhoneNumber string    `json:"phone_number"`

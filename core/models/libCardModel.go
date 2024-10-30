@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type LibCardModel struct {
+type JSONLibCardModel struct {
 	ID           uuid.UUID `json:"id"`
 	ReaderID     uuid.UUID `json:"reader_id"`
 	LibCardNum   string    `json:"lib_card_num"`

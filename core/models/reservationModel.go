@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type ReservationModel struct {
+type JSONReservationModel struct {
 	ID         uuid.UUID `json:"id"`
 	ReaderID   uuid.UUID `json:"reader_id"`
 	BookID     uuid.UUID `json:"book_id"`

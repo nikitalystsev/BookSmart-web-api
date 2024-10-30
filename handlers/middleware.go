@@ -3,6 +3,8 @@ package handlers
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/nikitalystsev/BookSmart-web-api/core/dto"
 	"net/http"
 	"strings"
 )
@@ -16,7 +18,7 @@ const (
 func (h *Handler) readerIdentity(c *gin.Context) {
 	id, role, err := h.parseAuthHeader(c)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
+		c.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{ErrorMsg: err.Error()})
 	}
 
 	c.Set(ID, id)
@@ -41,26 +43,44 @@ func (h *Handler) parseAuthHeader(c *gin.Context) (string, string, error) {
 	return h.tokenManager.Parse(headerParts[1])
 }
 
-func getReaderData(c *gin.Context) (string, string, error) {
+func getReaderData(c *gin.Context) (uuid.UUID, string, error) {
 	id, ok := c.Get(ID)
 	if !ok {
-		return "", "", errors.New("user id not found")
+		return uuid.Nil, "", errors.New("user id not found")
 	}
 
 	idStr, ok := id.(string)
 	if !ok {
-		return "", "", errors.New("user id is of invalid type")
+		return uuid.Nil, "", errors.New("user id is of invalid type")
 	}
 
 	role, ok := c.Get(Role)
 	if !ok {
-		return "", "", errors.New("user role not found")
+		return uuid.Nil, "", errors.New("user role not found")
 	}
 
 	roleStr, ok := role.(string)
 	if !ok {
-		return "", "", errors.New("user role is of invalid type")
+		return uuid.Nil, "", errors.New("user role is of invalid type")
 	}
 
-	return idStr, roleStr, nil
+	readerID, err := uuid.Parse(idStr)
+	if err != nil {
+		return uuid.Nil, "", err
+	}
+
+	return readerID, roleStr, nil
+}
+
+func isReaderID(c *gin.Context, readerID uuid.UUID) (bool, error) {
+	gettingReaderID, _, err := getReaderData(c)
+	if err != nil {
+		return false, err
+	}
+
+	if gettingReaderID != readerID {
+		return false, nil
+	}
+
+	return true, nil
 }

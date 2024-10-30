@@ -2,7 +2,7 @@ package models
 
 import "github.com/google/uuid"
 
-type BookModel struct {
+type JSONBookModel struct {
 	ID             uuid.UUID `json:"id"`
 	Title          string    `json:"title"`
 	Author         string    `json:"author"`
